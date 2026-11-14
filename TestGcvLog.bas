@@ -88,7 +88,7 @@ Private Sub Test_File_AppendsLinesToTheDailyFile()
     GcvLog.SetLogLevel vbNullString
     LogInfo "test", "first"
     LogInfo "test", "second"
-    AssertEqual True, Len(Dir$(LogFileFor(TestDay()))) > 0, "file named after the day"
+    AssertEqual True, Exists(LogFileFor(TestDay())), "file named after the day"
     content = ReadAll(LogFileFor(TestDay()))
     AssertEqual True, InStr(content, "first") > 0 And InStr(content, "second") > InStr(content, "first"), "in order"
 End Sub
@@ -138,9 +138,9 @@ Private Sub Test_DeleteOldLogs_RemovesOnlyFilesOlderThan30Days()
     WriteFile folder & "\" & Format$(TestDay() - 5, "yyyy-mm-dd") & ".log", "recent"
     WriteFile folder & "\notes.log", "not a daily file"
     GcvLog.DeleteOldLogs TestDay()
-    AssertEqual 0, Len(Dir$(folder & "\" & Format$(TestDay() - 40, "yyyy-mm-dd") & ".log")), "old deleted"
-    AssertEqual True, Len(Dir$(folder & "\" & Format$(TestDay() - 5, "yyyy-mm-dd") & ".log")) > 0, "recent kept"
-    AssertEqual True, Len(Dir$(folder & "\notes.log")) > 0, "other files kept"
+    AssertEqual False, Exists(folder & "\" & Format$(TestDay() - 40, "yyyy-mm-dd") & ".log"), "old deleted"
+    AssertEqual True, Exists(folder & "\" & Format$(TestDay() - 5, "yyyy-mm-dd") & ".log"), "recent kept"
+    AssertEqual True, Exists(folder & "\notes.log"), "other files kept"
 End Sub
 
 Private Sub Test_ExportLogs_CopiesRecentDaysIntoOneFile()
@@ -176,7 +176,7 @@ Private Function UseTempLog(ByVal name As String) As String
 End Function
 
 Private Function FileHas(ByVal text As String) As Boolean
-    If Len(Dir$(LogFileFor(TestDay()))) = 0 Then Exit Function
+    If Not Exists(LogFileFor(TestDay())) Then Exit Function
     FileHas = InStr(ReadAll(LogFileFor(TestDay())), text) > 0
 End Function
 
@@ -199,6 +199,8 @@ Private Sub WriteFile(ByVal path As String, ByVal text As String)
     Close #fileNumber
 End Sub
 
+' FileSystemObject: Dir$(..., vbDirectory) does not see hidden folders such as
+' AppData (the TEMP folder is inside it), so MkDir would fail on them.
 Private Sub MakeTestFolder(ByVal path As String)
     Dim parts() As String
     Dim current As String
@@ -207,9 +209,17 @@ Private Sub MakeTestFolder(ByVal path As String)
     current = parts(0)
     For i = 1 To UBound(parts)
         current = current & "\" & parts(i)
-        If Len(Dir$(current, vbDirectory)) = 0 Then MkDir current
+        If Not Fso().FolderExists(current) Then Fso().CreateFolder current
     Next i
 End Sub
+
+Private Function Exists(ByVal path As String) As Boolean
+    Exists = Fso().FileExists(path)
+End Function
+
+Private Function Fso() As Object
+    Set Fso = CreateObject("Scripting.FileSystemObject")
+End Function
 
 Private Sub StartTest(ByVal name As String)
     currentTest = name
