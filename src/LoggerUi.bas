@@ -20,7 +20,7 @@ Private Declare PtrSafe Function MessageBoxW Lib "user32" (ByVal hWnd As LongPtr
     ByVal lpText As LongPtr, ByVal lpCaption As LongPtr, ByVal uType As Long) As Long
 
 ' Address that receives issue reports (leave "" to let the secretary type it).
-Public Const SUPPORT_EMAIL As String = ""
+Public Const SUPPORT_EMAIL As String = "it.team@thegazachildrenvillage.org"
 
 Public Const REPORT_DAYS As Long = 14
 Private Const LOG_SOURCE As String = "logger"
