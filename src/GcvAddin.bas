@@ -10,7 +10,7 @@ Option Explicit
 Public Const ADDIN_ID As String = "gcv/logger"
 Public Const ADDIN_NAME As String = "GCV Logger"
 Public Const ADDIN_FILE As String = "GCV Logger.xlam"
-Public Const ADDIN_VERSION As String = "1.0.0"
+Public Const ADDIN_VERSION As String = "1.1.0"
 Public Const ADDIN_REPO As String = "Gaza-children-village/excel-logger"
 
 Public Const ID_PROPERTY As String = "GcvAddinId"
